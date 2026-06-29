@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>自定义悬浮图标与全屏图片系统</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* 去除手机端点击的高亮背景 */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* 手机端操作面板 */
+        .controls {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .upload-btn {
+            display: block;
+            color: white;
+            padding: 14px 20px;
+            margin: 16px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: opacity 0.2s;
+        }
+
+        .upload-btn:active {
+            opacity: 0.8;
+        }
+
+        /* 隐藏原生输入框 */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* =========================================
+           核心 1：悬浮图标（永远在屏幕正上方最顶层）
+           ========================================= */
+        #floating-icon {
+            position: fixed;
+            top: 30px; /* 距离屏幕顶部的距离 */
+            left: 50%;
+            transform: translateX(-50%); /* 确保水平居中 */
+            width: 70px;
+            height: 70px;
+            border-radius: 16px; /* 圆角 */
+            object-fit: cover;
+            z-index: 99999; /* 极高的层级，确保在所有东西的顶端 */
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+            display: none; /* 没上传前隐藏 */
+        }
+
+        /* =========================================
+           核心 2：全屏图片区域（层级低于图标）
+           ========================================= */
+        #fullscreen-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 90000; /* 高于控制面板，但低于悬浮图标 */
+            display: none; /* 默认隐藏 */
+            justify-content: center;
+            align-items: center;
+        }
+
+        #fullscreen-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 保证图片完整展示不被裁剪 */
+        }
+    </style>
+</head>
+<body>
+
+    <img id="floating-icon" src="" alt="自定义顶端图标">
+
+    <div id="fullscreen-container">
+        <img id="fullscreen-img" src="" alt="全屏展示的图片">
+    </div>
+
+    <div class="controls">
+        <h3 style="margin-top: 0; color: #333;">手机图片展示器</h3>
+        
+        <label class="upload-btn" style="background: #007bff;">
+            📸 1. 先上载顶端图标
+            <input type="file" id="icon-upload" accept="image/*">
+        </label>
+        
+        <label class="upload-btn" style="background: #28a745;">
+            🖼️ 2. 上载要全屏的图片
+            <input type="file" id="img-upload" accept="image/*">
+        </label>
+        
+        <p style="font-size: 13px; color: #888; margin-bottom: 0; margin-top: 20px;">
+            提示：全屏显示后，点击屏幕黑底区域即可退出。顶端图标将全程悬浮。
+        </p>
+    </div>
+
+    <script>
+        const iconUpload = document.getElementById('icon-upload');
+        const imgUpload = document.getElementById('img-upload');
+        const floatingIcon = document.getElementById('floating-icon');
+        const fullscreenContainer = document.getElementById('fullscreen-container');
+        const fullscreenImg = document.getElementById('fullscreen-img');
+
+        // 功能 1：读取并展示顶端图标
+        iconUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    floatingIcon.src = event.target.result;
+                    floatingIcon.style.display = 'block'; // 显示悬浮图标
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 功能 2：读取并全屏展示主图
+        imgUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    fullscreenImg.src = event.target.result;
+                    fullscreenContainer.style.display = 'flex'; // 唤起黑色全屏背景
+                    
+                    // 尝试触发手机浏览器的原生全屏（隐藏顶部网址栏，部分浏览器生效）
+                    const docEl = document.documentElement;
+                    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(()=>{});
+                    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 功能 3：点击全屏图片的任意位置（或黑边）即可退出
+        fullscreenContainer.addEventListener('click', function() {
+            fullscreenContainer.style.display = 'none'; // 隐藏全屏图片
+            imgUpload.value = ''; // 清空图片上传框的值，以便能够重新选择同一张图片
+            
+            // 退出原生全屏
+            if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        });
+    </script>
+
+</body>
+</html>
