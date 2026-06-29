@@ -2,85 +2,76 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>手机端双图全屏系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>图片全屏展示系统</title>
+    
+    <link rel="icon" href="IMG_6909.jpeg" type="image/jpeg">
+    <link rel="apple-touch-icon" href="IMG_6909.jpeg">
+
     <style>
+        /* 移动端基础重置 */
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* 去除手机点击时的蓝色高亮边框 */
+            -webkit-tap-highlight-color: transparent; /* 移除手机上点击时的蓝色高亮框 */
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
-            background-color: #f4f6f9;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f6f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        /* 主操作卡片 */
-        .card {
-            background: #ffffff;
-            width: 90%;
-            max-width: 380px;
-            padding: 30px 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        /* 主页面卡片容器 */
+        .main-container {
             text-align: center;
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            width: 85%;
+            max-width: 360px;
         }
 
-        .title {
-            font-size: 18px;
-            color: #333;
-            margin-bottom: 25px;
-            font-weight: 600;
-        }
-
-        /* 统一的手机端大按钮样式 */
-        .upload-box {
-            display: block;
-            background: #f0f3f6;
-            border: 2px dashed #cbd5e1;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .upload-box:active {
-            background: #e2e8f0;
-        }
-
-        .upload-box span {
-            display: block;
-            font-size: 14px;
-            color: #64748b;
-            margin-top: 8px;
-        }
-
-        /* 隐藏原生的丑陋上传按钮 */
-        input[type="file"] {
+        /* 原生文件上传框隐藏 */
+        #file-input {
             display: none;
         }
 
-        /* 实时预览的图标样式 */
-        .preview-icon-badge {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            object-fit: cover;
-            display: none; /* 初始隐藏，上传后显示 */
-            margin: 0 auto 5px auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        /* 网页中央的上传图标（使用你提供的图片） */
+        .site-logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 24px; /* 完美匹配图标的圆角 */
+            box-shadow: 0 8px 20px rgba(0, 118, 255, 0.25);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        /* 手机端手指按下时的微缩反馈效果 */
+        .site-logo:active {
+            transform: scale(0.95);
+        }
+
+        .upload-hint {
+            margin-top: 18px;
+            font-size: 16px;
+            color: #333333;
+            font-weight: 500;
+        }
+
+        .upload-sub-hint {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #94a3b8;
         }
 
         /* =========================================
-           手机端全屏遮罩层（完美兼容 iOS/Android）
+           手机端完美全屏遮罩层（兼容 iOS 和 Android）
            ========================================= */
         #fullscreen-overlay {
             display: none; /* 默认隐藏 */
@@ -95,70 +86,46 @@
             align-items: center;
         }
 
-        #fullscreen-image {
+        #fullscreen-img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* 确保整张图片在手机屏幕内完整显示，不被裁剪 */
+            object-fit: contain; /* 确保图片在手机屏幕上完整显示，不被裁剪 */
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <div class="title">手机端双图配置</div>
-
-        <label class="upload-box">
-            <input type="file" id="icon-input" accept="image/*">
-            <img id="icon-preview" class="preview-icon-badge" src="" alt="图标预览">
-            <div id="icon-text">⚙️ 点击上载主图标</div>
-            <span>(此图标可作为你页面的标识)</span>
-        </label>
-
-        <label class="upload-box" style="border-color: #3b82f6; background: #eff6ff;">
-            <input type="file" id="image-input" accept="image/*">
-            <div style="font-size: 28px;">🖼️</div>
-            <div style="color: #1d4ed8; font-weight: 500; margin-top: 5px;">点击上载全屏图片</div>
-            <span style="color: #3b82f6;">(选择后手机将自动全屏显示)</span>
+    <div class="main-container">
+        <input type="file" id="file-input" accept="image/*">
+        
+        <label for="file-input" style="cursor: pointer; display: inline-block;">
+            <img src="IMG_6909.jpeg" alt="网站标识" class="site-logo">
+            <div class="upload-hint">点击图标上传图片</div>
+            <div class="upload-sub-hint">支持从相册选择或直接拍照</div>
         </label>
     </div>
 
     <div id="fullscreen-overlay">
-        <img id="fullscreen-image" src="" alt="全屏大图">
+        <img id="fullscreen-img" src="" alt="全屏预览">
     </div>
 
     <script>
-        const iconInput = document.getElementById('icon-input');
-        const iconPreview = document.getElementById('icon-preview');
-        const iconText = document.getElementById('icon-text');
-
-        const imageInput = document.getElementById('image-input');
+        const fileInput = document.getElementById('file-input');
         const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-        const fullscreenImage = document.getElementById('fullscreen-image');
+        const fullscreenImg = document.getElementById('fullscreen-img');
 
-        // 逻辑 1：处理“图标”上载与更换
-        iconInput.addEventListener('change', function(e) {
+        // 1. 监听用户上传/拍摄行为
+        fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    iconPreview.src = event.target.result;
-                    iconPreview.style.display = 'block'; // 显示图片
-                    iconText.innerText = '✅ 图标已更换'; // 修改文字提示
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // 逻辑 2：处理“全屏图片”上载与全屏触发
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    fullscreenImage.src = event.target.result;
-                    fullscreenOverlay.style.display = 'flex'; // 展开黑色全屏层
+                    // 将上传的图片放入全屏容器中
+                    fullscreenImg.src = event.target.result;
+                    // 显示全屏黑色遮罩
+                    fullscreenOverlay.style.style.display = 'flex';
                     
-                    // 额外尝试唤起手机浏览器的隐藏状态栏动作（全面屏优化）
+                    // 动用浏览器原生全屏API（针对Android端可隐藏状态栏，iOS端则通过上面的fixed布局完美适配）
                     if (document.documentElement.requestFullscreen) {
                         document.documentElement.requestFullscreen().catch(() => {});
                     }
@@ -167,10 +134,10 @@
             }
         });
 
-        // 逻辑 3: 在全屏状态下，用手指轻触屏幕任意地方，即可退出全屏
+        // 2. 在全屏状态下，用手指轻触屏幕任意地方，即可退出全屏
         fullscreenOverlay.addEventListener('click', function() {
             fullscreenOverlay.style.display = 'none'; // 隐藏全屏层
-            imageInput.value = ''; // 清空输入框，方便下次连续上传同一张图
+            fileInput.value = ''; // 清空输入框，方便下次连续上传同一张图
             
             // 退出原生全屏状态
             if (document.exitFullscreen) {
