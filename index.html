@@ -1,132 +1,344 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片上传与全屏显示</title>
-    <style>
-        /* 基础页面样式，让内容居中 */
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f2f5;
-            font-family: sans-serif;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>图片上传并全屏显示</title>
+  <!-- 将你的图片保存为同目录的 icon.png 来作为主要图标 -->
+  <link id="favicon" rel="icon" href="icon.png" />
+  <style>
+    :root{
+      --bar-height:56px;
+      --bg:#0b78e6;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;}
+    body{background:var(--bg);color:#fff;display:flex;flex-direction:column;}
+    header{height:var(--bar-height);display:flex;align-items:center;gap:12px;padding:8px 14px;background:linear-gradient(0deg, rgba(255,255,255,0.04), transparent);box-shadow:0 1px 0 rgba(0,0,0,0.15);}
+    header img#appIcon{width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid rgba(255,255,255,0.12);background:#fff;}
+    header .title{font-weight:600;font-size:18px}
+    header .controls{margin-left:auto;display:flex;align-items:center;gap:8px;}
+    .btn{background:rgba(255,255,255,0.12);color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .uploader{display:flex;align-items:center;gap:12px}
+    input[type="file下面是一个完整的单文件 HTML 示例：可以上传/拖放图片并"]{display:none}
+    label.fileLabel{display:inline-flex;align-items:center;gap:全屏预览，同时页面的主要图标使用你提供8px;cursor:pointer}
+    main{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .的那张图片（把你上传的图片另存为 icon.png 放在drop-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:rgba(255,255同一目录即可）。我,255,0.6);padding:12px 18会先说明要点，然后给出完整代码，你保存为 index.html 并把图标文件放在同一px;border-radius:10px;background:rgba(0,0,0,0.15);backdrop-filter:blur(4px)}
+    .preview目录就可运行。
 
-        /* 上传区域的白色卡片 */
-        .upload-container {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
+要点
+- 将你上传到这个聊天的图片保存为 icon.png（或改动 HTML 中的 href/src 指向你图片的文件-wrap{width:100%;height:名100%;display:flex;align-items:center;justify-content:center}
+    img#preview{max-width:100%;max-height:100%;object-fit:contain;cursor:pointer;transition:transform .25s ease}
+    .fullscreen .preview-wrap{background:#000}
+    ./URL）。
+- 页面支持：点击图标打开文件选择、拖放图片到页面、bottom-bar{position:absolute;left:12点击图片或“全屏”按钮进入浏览器全屏（使用 Fullscreen API）。
+-px;right:12px;bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .toggle{display:flex;gap:8 支持键盘：Esc 关闭预览，按 F 切换全屏。
+- 自动回收临时对象 URL，避免内存泄漏。
 
-        /* 你提供的图标的样式 */
-        .icon {
-            width: 120px;
-            height: 120px;
-            border-radius: 24px; /* 增加圆角让图标更好看 */
-            cursor: pointer;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        /* 鼠标悬浮在图标上的放大特效 */
-        .icon:hover {
-            transform: scale(1.05);
-        }
-
-        .upload-text {
-            margin-top: 15px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        /* 全屏黑色遮罩层 */
-        #fullscreen-container {
-            display: none; /* 默认隐藏 */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: black;
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* 全屏显示的图片样式 */
-        #fullscreen-img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* 保证图片按比例完整显示 */
-        }
-    </style>
+完整文件（保存为px;align-items:center;background:rgba(0,0,0,0.25);padding:6 index.html）：
+```html name=index.html
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=devicepx 10px;border-radius:8px}
+    .small{font-size:13px-width;color:rgba(255,255,255,0.9)}
+    /* 拖拽高亮,initial-scale=1" />
+  <title>图片上传与全屏预览</title>
+  <!-- 把你提供的图片命名为 icon.png */
+    .dragover .drop-hint{background:rgba 并放在同一目录 -->
+  <link rel="icon" href="icon.png" />
+(255,255,255,0.18);color:#000}
+  </style>
 </head>
 <body>
+   <style>
+    : <header>
+    <img id="appIcon"root{--bg:#0b0b0b;--toolbar:rgba(255,255,255,0 src="icon.png" alt="app icon" />
+    <div class="title">图片全屏查看.06);--accent:#1e88e5}
+    html,body{height:100%;margin:0;font-family:system器</div>
 
-    <div class="upload-container">
-        <input type="file" id="file-input" accept="image/*" style="display: none;">
-        
-        <label for="file-input">
-            <img src="IMG_6909.jpeg" alt="上传图标" class="icon">
-            <div class="upload-text">点击图标上传图片</div>
+    <div class="controls">
+      <div class="uploader">
+-ui,-apple-system,Segoe        <label class="fileLabel btn" title="上传图片">
+          <input id="fileInput" type="file" UI,Roboto,"Helvetica Neue",Arial;color:#fff;background:#f3f6fb}
+    .topbar{display:flex;align-items:center;gap:.5rem;padding:.6 accept="image/*" />
+          上传图片
         </label>
+        <label style="rem}
+    .icon-btn{
+      width:56px;height:56px;border-radius:12pxdisplay:flex;align-items:center;gap:8px;color:#fff">
+;border:0;background:linear-gradient(#fff,#e6f0ff);padding:6px;display:inline-flex;
+               <input id="asIcon" type="checkbox" /> 设为主要图标
+        </label>
+ align-items:center;justify-content:center;cursor:pointer;box      </div-shadow:0 2px 8px rgba>
+
+      <button id="fsBtn" class="btn" title="进入/退出全屏">全屏(0,0,0,.12)
+    }
+    .icon-btn img{width:100%;height:100%;object-fit:contain;border-radius:8px}
+ (F)</button>
+      <button id="hideUi" class="btn" title="    .hint{margin-left:1rem;color:#333;font-size:14px隐藏顶部/底部 UI">隐藏}
+    .drop-area{
+      margin:1rem;padding:2rem;border-radius:12px;border: UI</button>
     </div>
+  </header>
 
-    <div id="fullscreen-container">
-        <img id="fullscreen-img" src="" alt="全屏预览">
+  <main id="mainArea">
+    <div class="drop-hint" id="dropHint">2px dashed #d6e4ff;background:linear-gradient(把图片拖到这里，或点击“上传图片”。单击图片也180deg,#fff,#f7fbff);
+      text-align:center;color:#666;
+    }
+   可切换全屏。</div>
+    <div class="preview-wrap">
+      <img id="preview" alt="预览图片" src="" style="display:none" />
+    </div /* 预览器 */
+    #viewer{
+      position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);z-index:999>
+
+   9 <;
+div class="bottom-bar" id="bottomBar">
+      <div class="toggle small">
+        双击/点击图片：切换全屏
+      </div>
+      <div class="small">按 Esc 退出全屏，按 F 进入/退出全屏</div>
     </div>
+  </main>
 
-    <script>
-        const fileInput = document.getElementById('file-input');
-        const fullscreenContainer = document.getElementById('fullscreen-container');
-        const fullscreenImg = document.getElementById('fullscreen-img');
+  <script      align-items:stretch;justify-content:center;transition:opacity .18s linear;
+    }
+    #toolbar{
+      display:flex;align-items:center;gap:.6rem;padding:.5rem 0.8rem>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+   ;background:var(--toolbar);backdrop-filter: blur(6px);
+      border-bottom:1px solid rgba(255,255,255,0.03);
+    }
+    const mainArea = document.getElementById('mainArea');
+    const drop .toolbar-icon{widthHint = document.getElementById('dropHint');
+   :36px;height:36px;border-radius:6px;object-fit:contain}
+    .filename{color:#ddd;font-size:14px}
+ const fsBtn = document.getElementById('fsBtn');
+    const appIcon = document.getElementBy   Id .('spappacerIcon{');
+    const faviconLink = document.getElementById('favicon');
+    const asIcon = document.getElementById('asIcon');
+    constflex:1}
+    .tool-btn{background:transparent;border:1px solid rgba(255,255,255,0.08);color:#fff;padding:.4rem .6rem;border-radius:8px;cursor:pointer}
+    #imageWrap{flex:1;display:flex;align-items:center;justify-content hideUiBtn = document.getElementById('hideUi');
+    const bottomBar = document.getElementById('bottomBar');
 
-        // 1. 监听用户选择图片
-        fileInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                // 读取本地文件
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    fullscreenImg.src = e.target.result; // 将图片内容赋值给全屏标签
-                    showFullscreen(); // 调用全屏功能
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+    let currentObjectURL:center;padding:1rem}
+    #preview = null;
+    let uiHidden = false;
 
-        // 2. 显示全屏图片并触发浏览器全屏模式
-        function showFullscreen() {
-            fullscreenContainer.style.display = 'flex'; // 显示黑色遮罩
-            
-            // 调用浏览器原生全屏 API（隐藏地址栏等）
-            if (fullscreenContainer.requestFullscreen) {
-                fullscreenContainer.requestFullscreen();
-            } else if (fullscreenContainer.webkitRequestFullscreen) {
-                fullscreenContainer.webkitRequestFullscreen(); // 兼容 Safari
-            }
+    function loadFile{max-width:100%;max-height:100%;object-fit:contain;cursor:pointer;border-radius:6px;box-shadow(file){
+      if(!file || !file.type.startsWith('image/')) return;
+:0 10px 30px rgba      if(currentObjectURL) URL.revokeObjectURL(currentObjectURL);
+      currentObjectURL = URL.createObjectURL(file);
+      preview.src = currentObjectURL;
+      preview.style.display(0,0,0,.6)}
+    /* 隐藏时用透明度而不是 display:none 方便过渡（JS 控制 hidden 属性） = */
+ '';
+         # dropviewerHint[.stylehidden.display]{ =opacity: '0none;';
+     pointer //-events 如果:none勾}
+选   “ /*设 小为屏主要优化 */
+    @media (max-width:600px){
+      .hint{display:none}
+      .drop-area{padding:1rem图}
+标     ”， .把icon favicon-btn 和{ appIconwidth 换:成48新图
+      if(asIcon.checked){
+        setAsIcon(currentObjectURL);
+      }
+    }
+
+    functionpx;height:48px}
+    }
+  </style>
+</head>
+<body>
+ setAsIcon(url){
+      // 更改页面中的图标（appIcon 及 favicon）
+      appIcon.src = url  <div class="topbar">
+    <button id="openBtn" class="icon-btn" title="上传/选择图片">
+      <img id="mainIcon" src="icon.png" alt="主要图标">
+    </button>
+    <div class="hint">点击图标选择图片 / 或将图片拖放到下面区域</;
+      // 动div>
+  </div>
+
+态更新 favicon：创建/替换 link 元素
+      if(faviconLink){
+        faviconLink.href = url;
+      } else {
+        const link = document.create  <div class="drop-area" id="dropArea">把图片拖放到这里，或点击图标选择图片</div>
+
+  <input id="fileInputElement"(' typelink="');
+file       " link accept.rel=" =image '/*icon"';
+        style link=".hrefdisplay =:none url";
+ />
+
+         link <!--.id  =预 'favicon';
+        document.head.appendChild(link);
+      }
+    }
+
+    fileInput览器 -->
+  <div id="viewer" hidden>
+    <div id="toolbar">
+      <img class="toolbar-icon" src="icon.png" alt="图标">
+      <div class="filename" id="fileName.add">未选择文件</div>
+      <div class="spacer"></div>
+      <button class="tool-btn" id="fullscreenBtn">全屏EventListener('change', (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(f) loadFile(f);
+    });
+
+    // 拖放支持
+</button>
+      <button class="tool-btn" id="closeBtn">关闭</button>
+    </div>
+    <div id="imageWrap">
+    ;      <img id="preview" src="" alt="预览图片" />
+['dragenter','dragover'].forEach(ev=>{
+      mainArea.addEventListener(ev,(e)=>{
+        e.preventDefault();e.stopPropagation();
+        document.body.classList.add    </div>
+  </div>
+
+  <script>
+    const openBtn = document.getElementById('openBtn');
+    const fileInput = document.getElementById('fileInput');
+    const dropArea = document.getElementById('dropArea('dragover');
+      },{passive:false});
+    });
+');
+       ; const[' viewer = document.getElementById('viewerdragleave','drop'].forEach(ev=>{
+      mainArea.addEventListener(ev');
+,(    const preview = document.getElementById('preview');
+    const closeBtn = document.getElementById('closeBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const fileNameEl = document.getElementById('fileName');
+
+    let currentObjectUrl = null;
+
+    function prevent(e){ e.preventDefault(); e.stopPropagatione)=>{
+        e.preventDefault();e.stopPropagation();
+        document.body.classList.remove('dragover');
+      },{passive:false});
+(); }
+
+    openBtn.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', e =>    });
+    mainArea.addEventListener('drop',(e)=>{
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(f) loadFile(f);
+    });
+
+    // 点击图片切换全 {
+      if (!e.target.files || !e.target.files[0]) return;
+      loadFile(e.target.files屏
+    preview.addEventListener('click', toggleFullscreen);
+    preview[0.addEventListener('dblclick', toggleFullscreen);
+
+    fsBtn.addEventListener('click', toggleFullscreen);
+
+    // 键盘]);
+      fileInput.value = '';
+    });
+
+    // 拖放
+    ['dragenter','dragover'].forEach(ev => {
+      dropArea.addEventListener(ev, (e)=>{ prevent(e); dropArea.style.borderColor = '#8fb3ff' });
+    });
+    ['dragleave快捷：F 切换，Esc ','退出（浏览器会自动处理 Esc）
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    });
+
+   drop'].forEach(ev => {
+      dropArea.addEventListener(ev, (e)=>{ e.preventDefault(); dropArea.style.borderColor = ''; });
+    });
+    dropArea.addEventListener('drop', (e)=>{
+      prevent(e);
+      const f = e.dataTransfer.files function toggleFullscreen(){
+      const el = document.documentElement; // 整页全屏
+      if && e.dataTransfer.files[0];
+      if (f && f.type.startsWith('image/')) loadFile(f);
+    });
+
+    function loadFile(file){
+     (! //document 回.full收screen上Element){
+一个       对象 // URL 
+进入     全 if屏 (current前把主区域设为 fullscreen 样式
+        el.requestFullscreenObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+     ?. current().ObjectcatchUrl(()=> ={ URL /*.create ignoreObject */URL });
+(file       );
+ document     .body preview.src = currentObjectUrl;
+      fileNameEl.textContent =.classList.add('fullscreen');
+      } else {
+        document.exitFullscreen?.();
+        document.body.classList.remove('fullscreen');
+      }
+    }
+
+    // 监听全屏变化，调整 UI（也可以隐藏 header/bottom）
+ file   .name document;
+.add     Event //Listener 显('示fullscreen预change览',
+ ()=>{
+           viewer.hidden = false;
+      // 轻微延迟以确保可见再聚焦（便于 if(document.fullscreenElement){
+        fsBtn.textContent键盘监听）
+      setTimeout(()=> preview.focus?.(), 50);
+    }
+
+    // 关闭预 =览 '
+退出   全 function屏 close (ViewerF(){
+)';
+           viewer }.hidden = true;
+      preview.src = '';
+      fileNameEl.textContent = '未选择文件';
+      if (currentObjectUrl){ URL.revokeObjectURL(currentObjectUrl); currentObjectUrl = else null {
+;        }
+ fs     Btn if.textContent = '全屏 (F)';
+      }
+    });
+
+    // 隐藏/显示 顶部和底部 UI，便 (于document更.full干screen净Element的)观看 document
+.exit   Fullscreen hide().UicatchBtn(()=>.add{EventListener('click', ()=>{
+      uiHidden = !uiHidden;
+      document.querySelector('header});
+    }
+    closeBtn.addEventListener('click', closeViewer);
+
+    // 预览区点击：切换全屏
+    preview.addEvent').style.display = uiHidden ? 'none' : 'flex';
+      bottomBar.style.display = uiHidden ? 'none' : 'flex';
+      hideUiBtn.textContent = uiListener('click', toggleFullscreen);
+    fullscreenBtn.addEventListenerHidden ? '显示 UI' : '隐藏 UI';
+    });
+
+    // 页面加载时，如果(' iconclick.png', 存 toggle在Fullscreen);
+
+    function toggleFullscreen(){
+      if (!document.fullscreenElement){
+        // 请求全屏针对 viewer（包含工具栏）
+        if (viewer.requestFullscreen) {
+          viewer.requestFullscreen().catch(()=>{});
+        } else {
+          // 没有 Fullscreen API 时，保持 UI 已经全屏（CSS 覆盖，浏览器会加载（若本地没有则会 404，但不会影响功能）
+    // 你也可以直接从页面上传图片并勾选“设）
         }
-
-        // 3. 点击全屏图片任意位置，退出全屏
-        fullscreenContainer.addEventListener('click', function() {
-            fullscreenContainer.style.display = 'none'; // 隐藏遮罩
-            fileInput.value = ''; // 清空上传记录，以便能重复上传同一张图片
-            
-            // 退出浏览器原生全屏
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        });
-    </script>
+      } else {
+        document.exitFullscreen().catch(()=>{});
+      }
+   为主要图标”来替换图标。
+  </script>
 </body>
-</html>
+</ }
+
+    // 键盘事件
+    window.addEventListener('keydown', (e)=>{
+      if (viewer.hidden) return;
+      if (e.key === 'html>
