@@ -2,275 +2,122 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>智能双图储存系统</title>
-    
-    <link id="dynamic-favicon" rel="icon" href="" type="image/jpeg">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片上传与预览</title>
     <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            background-color: #f5f7fb;
+            margin: 0;
         }
 
-        .card {
-            background: #ffffff;
-            width: 90%;
-            max-width: 380px;
-            padding: 25px 20px;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            text-align: center;
-        }
-
-        h3 {
-            margin-top: 0;
-            color: #1e293b;
-            font-size: 18px;
-        }
-
-        /* 上传区域通用样式 */
-        .upload-section {
-            background: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 20px 10px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            display: block;
-            transition: all 0.2s ease;
-        }
-
-        .upload-section:active {
-            background: #f1f5f9;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        /* 图标预览样式 */
-        #icon-preview {
-            width: 70px;
-            height: 70px;
-            border-radius: 16px;
-            object-fit: cover;
-            display: none;
-            margin: 0 auto 10px auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* 全屏主图预览样式 */
-        #main-preview {
-            width: 100%;
-            max-height: 150px;
+        .upload-container {
+            background-color: #ffffff;
+            padding: 30px;
             border-radius: 12px;
-            object-fit: cover;
-            display: none;
-            margin-top: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-
-        .hint {
-            font-size: 14px;
-            color: #475569;
-            font-weight: 500;
-        }
-
-        .sub-hint {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-
-        /* 恢复出厂设置按钮 */
-        .clear-btn {
-            background: none;
-            border: none;
-            color: #ef4444;
-            font-size: 13px;
-            margin-top: 10px;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        /* =========================================
-           手机端全屏遮罩层
-           ========================================= */
-        #fullscreen-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #000000;
-            z-index: 99999;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #fullscreen-img {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
             width: 100%;
-            height: 100%;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        /* 隐藏原生文件输入框，用好看的 label 代替 */
+        .file-input-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .file-input-label:hover {
+            background-color: #0056b3;
+        }
+
+        #image-input {
+            display: none;
+        }
+
+        /* 预览区域样式 */
+        .preview-container {
+            margin-top: 20px;
+            border: 2px dashed #cccccc;
+            border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fafafa;
+            overflow: hidden;
+        }
+
+        #preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            display: none; /* 默认隐藏，有图片时显示 */
             object-fit: contain;
+        }
+
+        .placeholder-text {
+            color: #888888;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h3>📱 移动端双图储存器</h3>
+<div class="upload-container">
+    <h2>上传图片预览</h2>
+    
+    <div class="preview-container" id="preview-box">
+        <span class="placeholder-text" id="placeholder">暂无预览图片</span>
+        <img id="preview-image" src="" alt="图片预览">
+    </div>
+
+    <label for="image-input" class="file-input-label">选择图片</label>
+    <input type="file" id="image-input" accept="image/*">
+</div>
+
+<script>
+    const imageInput = document.getElementById('image-input');
+    const previewImage = document.getElementById('preview-image');
+    const placeholder = document.getElementById('placeholder');
+
+    imageInput.addEventListener('change', function(event) {
+        const file = event.target.files[0]; // 获取用户选择的文件
         
-        <label class="upload-section">
-            <input type="file" id="icon-input" accept="image/*">
-            <img id="icon-preview" src="" alt="图标">
-            <div class="hint" id="icon-hint">⚙️ 设置网站主要图标</div>
-            <div class="sub-hint">上传后将自动保存并设为标签页图标</div>
-        </label>
+        if (file) {
+            const reader = new FileReader(); // 创建文件读取器
 
-        <label class="upload-section" style="border-color: #3b82f6; background: #f0f6ff;">
-            <input type="file" id="main-input" accept="image/*">
-            <div class="hint" style="color: #1d4ed8;">🖼️ 设置全屏显示照片</div>
-            <div class="sub-hint" style="color: #60a5fa;">选择后自动进入全屏展示</div>
-            <img id="main-preview" src="" alt="主图预览">
-        </label>
-
-        <button class="clear-btn" onclick="clearAllStorage()">🧹 清除缓存并重置</button>
-    </div>
-
-    <div id="fullscreen-overlay">
-        <img id="fullscreen-img" src="" alt="全屏展示中">
-    </div>
-
-    <script>
-        // 页面加载时自动调取历史储存
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedIcon = localStorage.getItem('stored_icon');
-            const savedMain = localStorage.getItem('stored_main');
-
-            if (savedIcon) {
-                applyIcon(savedIcon);
+            // 文件读取成功后的回调
+            reader.onload = function(e) {
+                previewImage.src = e.target.result; // 将图片的 Base64 编码赋给 img 标签
+                previewImage.style.display = 'block'; // 显示图片
+                placeholder.style.display = 'none';   // 隐藏提示文字
             }
-            if (savedMain) {
-                applyMainImage(savedMain, false); // 仅加载预览，不自动弹全屏
-            }
-        });
 
-        // 核心监听：图标上传
-        document.getElementById('icon-input').addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                compressAndSave(e.target.files[0], 200, 'stored_icon', (base64Data) => {
-                    applyIcon(base64Data);
-                });
-            }
-        });
-
-        // 核心监听：全屏图上传
-        document.getElementById('main-input').addEventListener('change', function(e) {
-            if (e.target.files[0]) {
-                compressAndSave(e.target.files[0], 1200, 'stored_main', (base64Data) => {
-                    applyMainImage(base64Data, true); // 新上传的图，自动弹全屏
-                });
-            }
-        });
-
-        // 渲染图标到界面
-        function applyIcon(base64) {
-            const iconPreview = document.getElementById('icon-preview');
-            iconPreview.src = base64;
-            iconPreview.style.display = 'block';
-            document.getElementById('icon-hint').innerText = '✅ 图标已永久锁定';
-            document.getElementById('dynamic-favicon').href = base64; // 修改浏览器标签图标
+            reader.readAsDataURL(file); // 开始读取文件
+        } else {
+            // 如果用户取消了选择
+            previewImage.src = "";
+            previewImage.style.display = 'none';
+            placeholder.style.display = 'block';
         }
+    });
+</script>
 
-        // 渲染主图到界面，并控制是否全屏
-        function applyMainImage(base64, triggerFullscreen) {
-            const mainPreview = document.getElementById('main-preview');
-            const fullscreenImg = document.getElementById('fullscreen-img');
-            const overlay = document.getElementById('fullscreen-overlay');
-
-            mainPreview.src = base64;
-            mainPreview.style.display = 'block';
-            fullscreenImg.src = base64;
-
-            if (triggerFullscreen) {
-                overlay.style.display = 'flex';
-                // 尝试触发手机自带的全面屏隐藏导航条功能
-                if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
-            }
-        }
-
-        // 智能压缩算法：防止手机照片撑爆本地储存
-        function compressAndSave(file, maxDimension, storageKey, successCallback) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    // 计算等比例缩放大小
-                    if (width > height) {
-                        if (width > maxDimension) { height *= maxDimension / width; width = maxDimension; }
-                    } else {
-                        if (height > maxDimension) { width *= maxDimension / height; height = maxDimension; }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // 转换为高质量高压缩比的jpeg
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
-                    
-                    try {
-                        localStorage.setItem(storageKey, compressedBase64);
-                        successCallback(compressedBase64);
-                    } catch (error) {
-                        alert('本地储存空间已满，请点击下方重置按钮后再试。');
-                    }
-                };
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // 点击全屏图片任意地方退出全屏
-        const overlayElement = document.getElementById('fullscreen-overlay');
-        overlayElement.addEventListener('click', () => {
-            overlayElement.style.display = 'none';
-            if (document.exitFullscreen) document.exitFullscreen().catch(()=>{});
-        });
-
-        // 允许用户单独点击主图预览再次进入全屏
-        document.getElementById('main-preview').addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            overlayElement.style.display = 'flex';
-        });
-
-        // 清除所有缓存数据
-        function clearAllStorage() {
-            if(confirm('确定要清除保存的图标和图片吗？')) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-    </script>
 </body>
 </html>
